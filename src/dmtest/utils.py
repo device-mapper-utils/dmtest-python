@@ -122,14 +122,16 @@ def _dd_device(ifile, ofile, oflag, sectors, sync=False):
         )
 
 
-def dt_device(file, io_type=None, pattern=None, size=None, rseed=None):
-    iotype = "random"
-    pattern = "iot"
-    size = dev_size(file)
+def dt_device(file, iotype=None, pattern=None, sectors=None, rseed=None):
+    iotype = iotype or "random"
+    pattern = pattern or "iot"
+    sectors = sectors or dev_size(file)
     rseed = rseed or 1234
 
+    block_size = min(sectors, units.meg(4))
+
     process.run(
-        f"dt of={file} capacity={size*512} pattern={pattern} passes=1 iotype={iotype} bs=4M rseed={rseed}"
+        f"dt of={file} capacity={sectors*512} pattern={pattern} passes=1 iotype={iotype} bs={block_size}b rseed={rseed}"
     )
 
 
