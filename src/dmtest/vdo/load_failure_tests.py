@@ -1,6 +1,6 @@
 from dmtest.assertions import assert_string_in
 from dmtest.vdo.utils import standard_vdo, standard_stack
-from dmtest.utils import get_dmesg_log, wipe_device
+from dmtest.utils import get_dmesg_log, dt_device
 import logging as log
 import time
 
@@ -52,8 +52,9 @@ def t_corrupt_geometry(fix):
     with standard_vdo(fix) as vdo:
         pass
     start_time = time.time()
-    # Trash just one (4kB) block
-    wipe_device(fix.cfg["data_dev"], 8)
+    # Trash just one (4kB) block by writing all 1s to it. Writing all
+    # zeros to it would make the kernel format the device.
+    dt_device(fix.cfg["data_dev"], "sequential", "0xFFFFFFFF", 8)
     stack = standard_stack(fix, format = False)
     started = False
     try:
@@ -62,7 +63,7 @@ def t_corrupt_geometry(fix):
     except:
         message = get_dmesg_log(start_time)
         log.info(message)
-        assert_string_in(message, "Could not load geometry block")
+        assert_string_in(message, "VDO Status: Bad magic number")
     if started:
         raise AssertionError("VDO device shouldn't have started")
 

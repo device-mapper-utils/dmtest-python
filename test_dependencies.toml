@@ -311,7 +311,7 @@ executables = [ "blockdev", "dmsetup", "vdoformat",]
 targets = [ "vdo",]
 
 ["/vdo/load_failure/corrupt_geometry"]
-executables = [ "blockdev", "dd", "dmsetup", "vdoformat",]
+executables = [ "blockdev", "dmsetup", "dt", "vdoformat",]
 targets = [ "vdo",]
 
 ["/cache/creation/small_config"]
