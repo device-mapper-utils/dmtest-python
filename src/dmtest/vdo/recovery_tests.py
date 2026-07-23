@@ -9,6 +9,9 @@ dm-vdo can recover to a consistent state.
 from dmtest.assertions import assert_equal, assert_matches, assert_raises
 from dmtest.device_mapper import dev as dmdev
 from dmtest.device_mapper import table, targets
+from dmtest.device_mapper.dev import Dev
+from dmtest.fixture import Fixture
+from dmtest.test_register import TestRegister
 from dmtest.units import SECTOR_SIZE
 from dmtest.vdo.utils import wait_for_index, fsync, run_fio
 from dmtest.vdo.utils import BLOCK_SIZE
@@ -23,7 +26,7 @@ import threading
 import time
 
 
-def write_recovery_data(vdo, tag, block_size=BLOCK_SIZE):
+def write_recovery_data(vdo: Dev, tag: str, block_size: int = BLOCK_SIZE) -> None:
     """Write some data to be interrupted by device loss."""
     log.info("Writing data for 5 seconds (should be interrupted)")
 
@@ -34,7 +37,7 @@ def write_recovery_data(vdo, tag, block_size=BLOCK_SIZE):
     assert_raises(write_data)
 
 
-def fail_vdo_storage(vdo, linear, block_size=BLOCK_SIZE):
+def fail_vdo_storage(vdo: Dev, linear: Dev, block_size: int = BLOCK_SIZE) -> float:
     """
     Force a recovery by replacing the underlying storage with an error target.
     """
@@ -66,7 +69,7 @@ def fail_vdo_storage(vdo, linear, block_size=BLOCK_SIZE):
     return recovery_start_time
 
 
-def verify_vdo_recovery(vdo, start_time: float):
+def verify_vdo_recovery(vdo: Dev, start_time: float) -> None:
     """Verify that VDO recovered successfully to a consistent state."""
     # Wait for index to come online
     wait_for_index(vdo)
@@ -97,7 +100,7 @@ def verify_vdo_recovery(vdo, start_time: float):
              f"logical blocks: {vdo_stats['logicalBlocksUsed']}")
 
 
-def t_single_recovery(fix):
+def t_single_recovery(fix: Fixture) -> None:
     """
     Test VDO recovery after a failure during write operations.
     """
@@ -162,7 +165,7 @@ def t_single_recovery(fix):
                      f"logical blocks: {stats_after['logicalBlocksUsed']}")
 
 
-def t_double_recovery(fix):
+def t_double_recovery(fix: Fixture) -> None:
     """
     Test two consecutive recoveries.
     """
@@ -259,7 +262,7 @@ def t_double_recovery(fix):
                      f"logical blocks: {stats_after['logicalBlocksUsed']}")
 
 
-def t_512_recovery(fix):
+def t_512_recovery(fix: Fixture) -> None:
     """
     Test VDO recovery after a failure during write operations.
     """
@@ -324,8 +327,7 @@ def t_512_recovery(fix):
                      f"logical blocks: {stats_after['logicalBlocksUsed']}")
 
 
-def register(tests):
-    """Register recovery tests."""
+def register(tests: TestRegister) -> None:
     tests.register_batch(
         "/vdo/recovery/",
         [

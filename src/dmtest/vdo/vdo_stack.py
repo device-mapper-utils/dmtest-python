@@ -3,20 +3,23 @@ import dmtest.device_mapper.table as table
 import dmtest.device_mapper.targets as targets
 import dmtest.utils as utils
 
+from dmtest.device_mapper.dev import Dev
 from dmtest.process import run
+from typing import Any
+
 
 class VDOStack:
-    def __init__(self, data_dev, **opts):
+    def __init__(self, data_dev: str | Dev, **opts: Any) -> None:
         self._data_dev = data_dev
-        self._physical_size = opts.pop("physical_size", utils.dev_size(data_dev) * 512)
-        self._mode = opts.pop("block_size", 4096)
-        self._block_map_cache = opts.pop("block_map_cache", 128 * 1024 * 1024)
-        self._block_map_period = opts.pop("block_map_period", 16380)
-        self._format = opts.pop("format", True)
-        self._logical_size = opts.pop("logical_size", 20 * 1024 * 1024 * 1024)
-        self._alb_mem = opts.pop("albireo_mem", 0.25)
-        self._alb_sparse = opts.pop("albireo_sparse", False)
-        self._slab_bits = opts.pop("slab_bits", None)
+        self._physical_size: int = opts.pop("physical_size", utils.dev_size(data_dev) * 512)
+        self._mode: int = opts.pop("block_size", 4096)
+        self._block_map_cache: int = opts.pop("block_map_cache", 128 * 1024 * 1024)
+        self._block_map_period: int = opts.pop("block_map_period", 16380)
+        self._format: bool = opts.pop("format", True)
+        self._logical_size: int = opts.pop("logical_size", 20 * 1024 * 1024 * 1024)
+        self._alb_mem: float = opts.pop("albireo_mem", 0.25)
+        self._alb_sparse: bool = opts.pop("albireo_sparse", False)
+        self._slab_bits: int | None = opts.pop("slab_bits", None)
         self._opts = opts
 
         if self._format:
@@ -31,7 +34,7 @@ class VDOStack:
             dev = self._data_dev
             run(f"vdoformat --force {logical_size} {mem}{sparse}{slab} {dev}")
 
-    def _vdo_table(self):
+    def _vdo_table(self) -> table.Table:
         return table.Table(
             targets.VDOTarget(
                 self._logical_size // 512,
@@ -44,5 +47,5 @@ class VDOStack:
             )
         )
 
-    def activate(self):
+    def activate(self) -> dmdev.Dev:
         return dmdev.dev(self._vdo_table())

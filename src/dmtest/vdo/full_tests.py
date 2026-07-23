@@ -5,8 +5,10 @@ reclamation via discard operations. Verifies free space tracking at each step.
 """
 from dmtest.assertions import assert_equal
 import dmtest.device_mapper.dev as dmdev
+from dmtest.fixture import Fixture
 from dmtest.gendatablocks import make_block_range
 import dmtest.process as process
+from dmtest.test_register import TestRegister
 import dmtest.tvm as tvm
 import dmtest.units as units
 import dmtest.vdo.stats as stats
@@ -15,11 +17,13 @@ import dmtest.vdo.vdo_stack as vs
 
 import logging as log
 import time
+from typing import Any
 
-def get_free_space(stats):
+
+def get_free_space(stats: dict[str, Any]) -> int:
     return stats["physicalBlocks"] - stats["overheadBlocksUsed"] - stats["dataBlocksUsed"]
 
-def t_full(fix):
+def t_full(fix: Fixture) -> None:
     data_dev = fix.cfg("data_dev")
     # Configure a small device so we can fill it quickly.
     slab_bits = 13
@@ -104,5 +108,5 @@ def t_full(fix):
             free_space = get_free_space(new_stats)
             assert_equal(free_space, (size1 - MB) // 4096)
 
-def register(tests):
+def register(tests: TestRegister) -> None:
     tests.register("/vdo/full", t_full)

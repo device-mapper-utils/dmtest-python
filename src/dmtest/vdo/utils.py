@@ -1,3 +1,5 @@
+from dmtest.device_mapper.dev import Dev
+from dmtest.fixture import Fixture
 import dmtest.process as process
 from dmtest.utils import dev_size
 import dmtest.vdo.vdo_stack as vs
@@ -11,6 +13,7 @@ from math import ceil
 import os
 import tempfile
 import time
+from typing import Any
 
 # dmtest.units.kilo etc count in sectors, not bytes
 kB = 1024
@@ -38,14 +41,14 @@ end_fsync=0
 group_reporting=1
 """
 
-def standard_stack(fix, **opts):
+def standard_stack(fix: Fixture, **opts: Any) -> vs.VDOStack:
     return vs.VDOStack(fix.cfg("data_dev"), **opts)
 
-def standard_vdo(fix, **opts):
+def standard_vdo(fix: Fixture, **opts: Any) -> Dev:
     stack = standard_stack(fix, **opts)
     return stack.activate()
 
-def wait_for_index(dev):
+def wait_for_index(dev: Dev) -> None:
     count = 0;
     while (count < 30 and status.vdo_status(dev)["index-state"] != "online"):
         count += 1
@@ -53,12 +56,12 @@ def wait_for_index(dev):
     if status.vdo_status(dev)["index-state"] != "online":
         raise AssertionError("VDO not online within 30 seconds")
 
-def fsync(dev):
+def fsync(dev: Dev) -> None:
     """Sync the specified device or file."""
     with open(dev, 'w') as thing:
         os.fsync(thing.fileno())
 
-def run_fio_with_config(fio_config, raise_on_fail=True):
+def run_fio_with_config(fio_config: str, raise_on_fail: bool = True) -> dict[str, Any] | str:
     """Run fio with the specified config file content.
 
     On success, return the parsed statistics output. On failure, throw
@@ -83,8 +86,9 @@ def run_fio_with_config(fio_config, raise_on_fail=True):
                 log.info(f"wrote {written} bytes in {duration} msec")
                 return fio_out
 
-def run_fio(dev, size, offset, verify = False, stats = True, compression = 0, randseed = 1,
-            duration = 0, raise_on_fail = True):
+def run_fio(dev: Dev, size: int, offset: int, verify: bool = False,
+            stats: bool = True, compression: int = 0, randseed: int = 1,
+            duration: int = 0, raise_on_fail: bool = True) -> dict[str, Any] | str | None:
     """Run fio with the specified values.
 
     On success, return the parsed statistics output if stats is
@@ -106,7 +110,7 @@ def run_fio(dev, size, offset, verify = False, stats = True, compression = 0, ra
 
 block_map_entries_per_page = 812
 
-def populate_block_map(vdo_dev):
+def populate_block_map(vdo_dev: Dev) -> None:
     """Make sure the VDO device's block map has been fully allocated,
     by writing zero blocks every so often to force population of the
     tree.
@@ -136,7 +140,7 @@ zero_buffers=1
 
 # Useful while debugging tests: suspend execution and let the
 # developer examine Python variables, system state, etc.
-def repl(my_locals):
+def repl(my_locals: dict[str, Any]) -> None:
     """Invoke a Python interactive session with access to the supplied
     local variables. Intended for debugging tests, to pause execution
     and allow examination of the test device and a test's internal

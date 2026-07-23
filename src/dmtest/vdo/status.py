@@ -1,9 +1,12 @@
 import re
 
-def _parse_vdo_status(str):
-    tokens = re.split(r"\s+", str)
+from dmtest.device_mapper.dev import Dev
 
-    h = {}
+
+def _parse_vdo_status(status_str: str) -> dict[str, str]:
+    tokens = re.split(r"\s+", status_str)
+
+    h: dict[str, str] = {}
     h["storage-device"] = tokens[3]
     h["mode"] = tokens[4]
     h["recovery-mode"] = tokens[5]
@@ -14,5 +17,5 @@ def _parse_vdo_status(str):
 
     return h
 
-def vdo_status(dev):
+def vdo_status(dev: Dev) -> dict[str, str]:
     return _parse_vdo_status(dev.status())

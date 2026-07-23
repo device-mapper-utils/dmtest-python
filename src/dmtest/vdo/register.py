@@ -5,7 +5,10 @@ import dmtest.vdo.full_tests as vdo_full
 import dmtest.vdo.load_failure_tests as vdo_load_failure
 import dmtest.vdo.recovery_tests as vdo_recovery
 
-def register(tests):
+from dmtest.test_register import TestRegister
+
+
+def register(tests: TestRegister) -> None:
     vdo_creation.register(tests)
     vdo_dedupe.register(tests)
     vdo_compress.register(tests)
