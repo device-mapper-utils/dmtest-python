@@ -49,7 +49,7 @@ def standard_vdo(fix: Fixture, **opts: Any) -> Dev:
     return stack.activate()
 
 def wait_for_index(dev: Dev) -> None:
-    count = 0;
+    count = 0
     while (count < 30 and status.vdo_status(dev)["index-state"] != "online"):
         count += 1
         time.sleep(1)

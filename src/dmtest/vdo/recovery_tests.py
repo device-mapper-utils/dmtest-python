@@ -63,7 +63,7 @@ def fail_vdo_storage(vdo: Dev, linear: Dev, block_size: int = BLOCK_SIZE) -> flo
     # Flush pending writes to trigger an error
     try:
         fsync(vdo)
-    except:
+    except OSError:
         pass
 
     return recovery_start_time

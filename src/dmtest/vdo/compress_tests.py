@@ -11,7 +11,6 @@ from dmtest.gendatablocks import make_block_range
 from dmtest.test_register import TestRegister
 from dmtest.vdo.stats import vdo_stats
 from dmtest.vdo.utils import BLOCK_SIZE, MB, fsync, standard_vdo, wait_for_index
-import dmtest.process as process
 
 import logging as log
 import time

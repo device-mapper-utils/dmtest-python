@@ -24,5 +24,5 @@ def make_delta_stats(stats_post: Any, stats_pre: Any) -> Any:
 
 def vdo_stats(dev: Dev) -> dict[str, Any]:
     os.sync()
-    stats = dev.message(0, "stats");
+    stats = dev.message(0, "stats")
     return _parse_vdo_stats(stats)

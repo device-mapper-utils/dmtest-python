@@ -10,7 +10,7 @@ from dmtest.vdo.utils import standard_vdo
 
 
 def t_create(fix: Fixture) -> None:
-    with standard_vdo(fix) as vdo:
+    with standard_vdo(fix):
         pass
 
 def register(tests: TestRegister) -> None:

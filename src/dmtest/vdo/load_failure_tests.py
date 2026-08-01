@@ -10,6 +10,7 @@ from dmtest.test_register import TestRegister
 from dmtest.vdo.utils import standard_vdo, standard_stack
 from dmtest.utils import get_dmesg_log, trash_device
 import logging as log
+import subprocess
 import time
 from typing import Any
 
@@ -21,7 +22,7 @@ def try_a_bad_value(fix: Fixture, expected_message: str, **opts: Any) -> None:
     try:
         with stack.activate():
             started = True
-    except:
+    except subprocess.CalledProcessError:
         message = get_dmesg_log(start_time)
         log.info(message)
         assert_string_in(message, expected_message)
@@ -59,7 +60,7 @@ def t_bad_values(fix: Fixture) -> None:
 
 def t_corrupt_geometry(fix: Fixture) -> None:
     # Test trying to start when the geometry block has been clobbered.
-    with standard_vdo(fix) as vdo:
+    with standard_vdo(fix):
         pass
     start_time = time.time()
     # Overwrite just one (4kB) block with random data
@@ -69,7 +70,7 @@ def t_corrupt_geometry(fix: Fixture) -> None:
     try:
         with stack.activate():
             started = True
-    except:
+    except subprocess.CalledProcessError:
         message = get_dmesg_log(start_time)
         log.info(message)
         assert_matches(message, r"Could not (load|parse) geometry block")

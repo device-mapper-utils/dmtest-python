@@ -10,7 +10,6 @@ from dmtest.fixture import Fixture
 from dmtest.test_register import TestRegister
 from dmtest.vdo.utils import BLOCK_SIZE, standard_vdo, wait_for_index
 import dmtest.gendatablocks as generator
-import dmtest.process as process
 import dmtest.vdo.stats as stats
 
 
@@ -61,14 +60,13 @@ def t_dedupeWithOffsetAndRestart(fix: Fixture) -> None:
         dedupeAdviceValid should equal the number of blocks written originally
     """
     block_count = 5000
-    size = block_count * BLOCK_SIZE
     with standard_vdo(fix) as vdo:
         range1 = generator.make_block_range(path=vdo.path, block_size=BLOCK_SIZE,
                                             block_count=block_count)
         range2 = generator.make_block_range(path=vdo.path, block_size=BLOCK_SIZE,
                                             block_count=block_count,
                                             offset=block_count)
-        # Write {size} data at 0 offset
+        # Write data at 0 offset
         range1.write(tag="hello", dedupe=0, compress=0, fsync=True)
 
         # Verify first round statistics equal total data written
@@ -76,7 +74,7 @@ def t_dedupeWithOffsetAndRestart(fix: Fixture) -> None:
         assert_equal(vdo_stats_before['dataBlocksUsed'], block_count)
         assert_equal(vdo_stats_before['index']['entriesIndexed'], block_count)
 
-        # Write {size} data at {size} offset
+        # Write same data at second offset
         range2.write(tag="hello", dedupe=0, compress=0, fsync=True)
 
         # Verify second round statistics reflect effective deduplication
@@ -98,7 +96,6 @@ def t_dedupeWithOverwrite(fix: Fixture) -> None:
     cleanly.
     """
     block_count = 5000
-    size = block_count * BLOCK_SIZE
     with standard_vdo(fix) as vdo:
         range = generator.make_block_range(path=vdo.path, block_size=BLOCK_SIZE,
                                            block_count=block_count)

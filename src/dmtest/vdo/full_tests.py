@@ -7,7 +7,6 @@ from dmtest.assertions import assert_equal
 import dmtest.device_mapper.dev as dmdev
 from dmtest.fixture import Fixture
 from dmtest.gendatablocks import make_block_range
-import dmtest.process as process
 from dmtest.test_register import TestRegister
 import dmtest.tvm as tvm
 import dmtest.units as units
@@ -16,7 +15,6 @@ from dmtest.vdo.utils import MB, GB, populate_block_map
 import dmtest.vdo.vdo_stack as vs
 
 import logging as log
-import time
 from typing import Any
 
 
