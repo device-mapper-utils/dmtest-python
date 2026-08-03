@@ -6,24 +6,24 @@ under dm-vdo with a dm-error target mid-operation, then verifying that
 dm-vdo can recover to a consistent state.
 """
 
+import logging as log
+import re
+import threading
+import time
+
+import dmtest.utils as utils
+import dmtest.vdo.stats as stats
+import dmtest.vdo.status as status
 from dmtest.assertions import assert_equal, assert_matches, assert_raises
 from dmtest.device_mapper import dev as dmdev
 from dmtest.device_mapper import table, targets
 from dmtest.device_mapper.dev import Dev
 from dmtest.fixture import Fixture
+from dmtest.gendatablocks import make_block_range
 from dmtest.test_register import TestRegister
 from dmtest.units import SECTOR_SIZE
-from dmtest.vdo.utils import wait_for_index, fsync, run_fio
-from dmtest.vdo.utils import BLOCK_SIZE
+from dmtest.vdo.utils import BLOCK_SIZE, fsync, run_fio, wait_for_index
 from dmtest.vdo.vdo_stack import VDOStack
-import dmtest.vdo.stats as stats
-import dmtest.vdo.status as status
-from dmtest.gendatablocks import make_block_range
-import dmtest.utils as utils
-import logging as log
-import re
-import threading
-import time
 
 
 def write_recovery_data(vdo: Dev, tag: str, block_size: int = BLOCK_SIZE) -> None:

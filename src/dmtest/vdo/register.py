@@ -4,7 +4,6 @@ import dmtest.vdo.dedupe_tests as vdo_dedupe
 import dmtest.vdo.full_tests as vdo_full
 import dmtest.vdo.load_failure_tests as vdo_load_failure
 import dmtest.vdo.recovery_tests as vdo_recovery
-
 from dmtest.test_register import TestRegister
 
 

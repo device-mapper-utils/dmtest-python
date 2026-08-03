@@ -4,17 +4,18 @@ Tests VDO's compression functionality including writing compressible data,
 verifying compression ratios, and ensuring deduplication works correctly
 against compressed blocks.
 """
+import logging as log
+import time
+from typing import Any
+
 from dmtest.assertions import assert_equal, assert_near
 from dmtest.device_mapper.dev import Dev
 from dmtest.fixture import Fixture
 from dmtest.gendatablocks import make_block_range
 from dmtest.test_register import TestRegister
 from dmtest.vdo.stats import vdo_stats
-from dmtest.vdo.utils import BLOCK_SIZE, MB, fsync, standard_vdo, wait_for_index
-
-import logging as log
-import time
-from typing import Any
+from dmtest.vdo.utils import (BLOCK_SIZE, MB, fsync, standard_vdo,
+                              wait_for_index)
 
 
 def wait_until_packer_only(vdo: Dev) -> dict[str, Any]:

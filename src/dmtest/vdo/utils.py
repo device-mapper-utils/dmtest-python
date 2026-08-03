@@ -1,19 +1,19 @@
-from dmtest.device_mapper.dev import Dev
-from dmtest.fixture import Fixture
-import dmtest.process as process
-from dmtest.utils import dev_size
-import dmtest.vdo.vdo_stack as vs
-import dmtest.vdo.stats as stats
-import dmtest.vdo.status as status
-
 import code
 import json
 import logging as log
-from math import ceil
 import os
 import tempfile
 import time
+from math import ceil
 from typing import Any
+
+import dmtest.process as process
+import dmtest.vdo.stats as stats
+import dmtest.vdo.status as status
+import dmtest.vdo.vdo_stack as vs
+from dmtest.device_mapper.dev import Dev
+from dmtest.fixture import Fixture
+from dmtest.utils import dev_size
 
 # dmtest.units.kilo etc count in sectors, not bytes
 kB = 1024

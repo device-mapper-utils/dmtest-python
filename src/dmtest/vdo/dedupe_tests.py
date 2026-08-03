@@ -4,13 +4,13 @@ Tests VDO's deduplication functionality at various dedupe rates (0%, 50%, 75%),
 verifying statistics are correct and that duplicate data is properly identified
 across different write patterns (same offset, different offsets).
 """
+import dmtest.gendatablocks as generator
+import dmtest.vdo.stats as stats
 from dmtest.assertions import assert_equal, assert_near
 from dmtest.device_mapper.dev import Dev
 from dmtest.fixture import Fixture
 from dmtest.test_register import TestRegister
 from dmtest.vdo.utils import BLOCK_SIZE, standard_vdo, wait_for_index
-import dmtest.gendatablocks as generator
-import dmtest.vdo.stats as stats
 
 
 def verify_dedupe(vdo: Dev, dedupe: float) -> None:

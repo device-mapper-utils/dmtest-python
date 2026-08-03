@@ -4,15 +4,16 @@ Tests VDO device creation failures including invalid configuration parameters
 (thread counts, zone counts) and corrupted geometry blocks, verifying proper
 error reporting.
 """
-from dmtest.assertions import assert_matches, assert_string_in
-from dmtest.fixture import Fixture
-from dmtest.test_register import TestRegister
-from dmtest.vdo.utils import standard_vdo, standard_stack
-from dmtest.utils import get_dmesg_log, trash_device
 import logging as log
 import subprocess
 import time
 from typing import Any
+
+from dmtest.assertions import assert_matches, assert_string_in
+from dmtest.fixture import Fixture
+from dmtest.test_register import TestRegister
+from dmtest.utils import get_dmesg_log, trash_device
+from dmtest.vdo.utils import standard_stack, standard_vdo
 
 
 def try_a_bad_value(fix: Fixture, expected_message: str, **opts: Any) -> None:

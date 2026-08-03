@@ -1,8 +1,9 @@
 import os
 from typing import Any
 
-from dmtest.device_mapper.dev import Dev
 import yaml
+
+from dmtest.device_mapper.dev import Dev
 
 
 def _parse_vdo_stats(stats: str) -> dict[str, Any]:

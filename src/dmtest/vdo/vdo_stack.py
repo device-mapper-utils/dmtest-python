@@ -1,11 +1,11 @@
+from typing import Any
+
 import dmtest.device_mapper.dev as dmdev
 import dmtest.device_mapper.table as table
 import dmtest.device_mapper.targets as targets
 import dmtest.utils as utils
-
 from dmtest.device_mapper.dev import Dev
 from dmtest.process import run
-from typing import Any
 
 
 class VDOStack:
