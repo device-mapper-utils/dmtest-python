@@ -10,7 +10,7 @@ from dmtest.assertions import assert_equal, assert_matches, assert_raises
 from dmtest.device_mapper import dev as dmdev
 from dmtest.device_mapper import table, targets
 from dmtest.units import SECTOR_SIZE
-from dmtest.vdo.utils import wait_for_index, fsync
+from dmtest.vdo.utils import wait_for_index, fsync, run_fio
 from dmtest.vdo.utils import BLOCK_SIZE
 from dmtest.vdo.vdo_stack import VDOStack
 import dmtest.vdo.stats as stats
@@ -29,7 +29,7 @@ def write_recovery_data(vdo, tag, block_size=BLOCK_SIZE):
 
     # This write should fail due to error target introduction
     def write_data():
-        run_fio(vdo, offset=30000, comression=55, duration=5, size=0)
+        run_fio(vdo, offset=40 * 1024 * 1024, compression=55, duration=5, size=0)
 
     assert_raises(write_data)
 
