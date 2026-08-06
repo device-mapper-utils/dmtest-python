@@ -3,8 +3,11 @@ from dmtest.utils import dev_size
 import dmtest.vdo.vdo_stack as vs
 import dmtest.vdo.stats as stats
 import dmtest.vdo.status as status
+from dmtest.fs import Ext4
+from dmtest.test_register import MissingTestDep
 
 import code
+from contextlib import contextmanager
 import json
 import logging as log
 from math import ceil
@@ -18,6 +21,9 @@ MB = 1024 * kB
 GB = 1024 * MB
 
 BLOCK_SIZE = 4 * kB
+
+# VDO slab bit count constants
+SLAB_BITS_SMALL = 17  # Smallest size that works for any RSVP-reserved host
 
 fio_config_template = """
 [stuff]
@@ -53,10 +59,109 @@ def wait_for_index(dev):
     if status.vdo_status(dev)["index-state"] != "online":
         raise AssertionError("VDO not online within 30 seconds")
 
+
+@contextmanager
+def mounted_fs(dev, fs_class=None, format=False, **format_opts):
+    """Create, optionally format, and mount a filesystem as a context manager.
+
+    Yields the mount point path and ensures unmount, fsck, and mount
+    point removal on exit.
+    """
+    if fs_class is None:
+        fs_class = Ext4
+    fs = fs_class(dev)
+    if format:
+        fs.format(**format_opts)
+    with tempfile.TemporaryDirectory() as mount_point:
+        fs.mount(mount_point)
+        try:
+            yield mount_point
+        finally:
+            fs.umount()
+
+
+def wait_until_io_settled(vdo):
+    """Wait until all I/Os are completed or waiting in the packer.
+
+    When testing VDO compression, this function ensures predictable
+    compression ratios by waiting for all I/Os to either complete or
+    reach the packer stage before flushing. I/Os still in earlier
+    processing stages (e.g., deduplication) may be written uncompressed
+    if fsync is called too early.
+
+    Args:
+        vdo: VDO device object
+
+    Returns:
+        VDO statistics dict collected after waiting
+    """
+    while True:
+        vdo_stats = stats.vdo_stats(vdo)
+        if vdo_stats['currentVIOsInProgress'] == vdo_stats['packer']['compressedFragmentsInPacker']:
+            return vdo_stats
+        time.sleep(0.001)
+
+
 def fsync(dev):
     """Sync the specified device or file."""
     with open(dev, 'w') as thing:
         os.fsync(thing.fileno())
+
+
+def _parse_version(version_str):
+    """Parse a version string like '9.2.0' into a tuple of integers."""
+    parts = version_str.strip().lstrip('v').split('.')
+    return tuple(int(p) for p in parts)
+
+
+def _get_vdo_version():
+    """Get the VDO kernel module version from dmsetup targets.
+
+    Returns:
+        Tuple of integers representing the version (e.g., (9, 2, 0))
+        or None if VDO target is not available.
+    """
+    returncode, stdout, stderr = process.run("dmsetup targets")
+    for line in stdout.splitlines():
+        if line.startswith('vdo '):
+            # Format is: "vdo              v9.2.0"
+            parts = line.split()
+            if len(parts) >= 2:
+                return _parse_version(parts[1])
+    return None
+
+
+def vdo_min_version(min_version_str):
+    """Create a dependency check function that verifies VDO kernel module version.
+
+    Args:
+        min_version_str: Minimum required version as string (e.g., "9.2.0")
+
+    Returns:
+        A callable that raises MissingTestDep if VDO version is too old.
+
+    Example:
+        tests.register_batch(
+            "/vdo/format-in-kernel/",
+            [("test", t_test)],
+            batch_dep_fn=vdo_min_version("9.2.0")
+        )
+    """
+    min_version = _parse_version(min_version_str)
+
+    def check_version():
+        actual_version = _get_vdo_version()
+        if actual_version is None:
+            raise MissingTestDep("VDO kernel module (dm_vdo)")
+
+        if actual_version < min_version:
+            raise MissingTestDep(
+                f"VDO kernel module version {'.'.join(map(str, actual_version))} "
+                f"(requires >= {min_version_str})"
+            )
+
+    return check_version
+
 
 def run_fio_with_config(fio_config, raise_on_fail=True):
     """Run fio with the specified config file content.
