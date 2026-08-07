@@ -4,20 +4,26 @@ Tests VDO device creation failures including invalid configuration parameters
 (thread counts, zone counts) and corrupted geometry blocks, verifying proper
 error reporting.
 """
-from dmtest.assertions import assert_matches, assert_string_in
-from dmtest.vdo.utils import standard_vdo, standard_stack
-from dmtest.utils import get_dmesg_log, trash_device
 import logging as log
+import subprocess
 import time
+from typing import Any
 
-def try_a_bad_value(fix, expected_message, **opts):
+from dmtest.assertions import assert_matches, assert_string_in
+from dmtest.fixture import Fixture
+from dmtest.test_register import TestRegister
+from dmtest.utils import get_dmesg_log, trash_device
+from dmtest.vdo.utils import standard_stack, standard_vdo
+
+
+def try_a_bad_value(fix: Fixture, expected_message: str, **opts: Any) -> None:
     start_time = time.time()
     stack = standard_stack(fix, **opts)
     started = False
     try:
         with stack.activate():
             started = True
-    except:
+    except subprocess.CalledProcessError:
         message = get_dmesg_log(start_time)
         log.info(message)
         assert_string_in(message, expected_message)
@@ -26,7 +32,7 @@ def try_a_bad_value(fix, expected_message, **opts):
     if started:
         raise AssertionError("VDO device shouldn't have started")
 
-def t_bad_values(fix):
+def t_bad_values(fix: Fixture) -> None:
     # Test thread/zone counts exceeding hard-coded limits.
     format = True
     max_threads = {
@@ -53,9 +59,9 @@ def t_bad_values(fix):
     # To be tested: physical zones exceeds slab count
 
 
-def t_corrupt_geometry(fix):
+def t_corrupt_geometry(fix: Fixture) -> None:
     # Test trying to start when the geometry block has been clobbered.
-    with standard_vdo(fix) as vdo:
+    with standard_vdo(fix):
         pass
     start_time = time.time()
     # Overwrite just one (4kB) block with random data
@@ -65,7 +71,7 @@ def t_corrupt_geometry(fix):
     try:
         with stack.activate():
             started = True
-    except:
+    except subprocess.CalledProcessError:
         message = get_dmesg_log(start_time)
         log.info(message)
         assert_matches(message, r"Could not (load|parse) geometry block")
@@ -73,7 +79,7 @@ def t_corrupt_geometry(fix):
         raise AssertionError("VDO device shouldn't have started")
 
 
-def register(tests):
+def register(tests: TestRegister) -> None:
     tests.register_batch(
         "/vdo/load_failure/",
         [

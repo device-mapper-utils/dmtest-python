@@ -1,10 +1,15 @@
 import os
+from typing import Any
+
 import yaml
 
-def _parse_vdo_stats(stats):
+from dmtest.device_mapper.dev import Dev
+
+
+def _parse_vdo_stats(stats: str) -> dict[str, Any]:
     return yaml.safe_load(stats)
 
-def make_delta_stats(stats_post, stats_pre):
+def make_delta_stats(stats_post: Any, stats_pre: Any) -> Any:
     """
     Given two stats dicts, the code creates a copy of post_stats except all
     its int fields values are the delta between post and pre.
@@ -18,7 +23,7 @@ def make_delta_stats(stats_post, stats_pre):
         return stats_post - stats_pre
     return stats_post
 
-def vdo_stats(dev):
+def vdo_stats(dev: Dev) -> dict[str, Any]:
     os.sync()
-    stats = dev.message(0, "stats");
+    stats = dev.message(0, "stats")
     return _parse_vdo_stats(stats)

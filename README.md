@@ -8,6 +8,7 @@
 pip install -r requirements.txt
 ```
 
+- Make sure pyright and ruff are installed.
 - Edit config.toml for your system
 - Check for tool requirements by running:
 
